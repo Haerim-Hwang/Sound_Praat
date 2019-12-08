@@ -1,0 +1,62 @@
+# Author: Shigeto Kawahara
+# Version: Dec 28th 2014
+
+
+# This script makes pairs of two sounds
+# using all the sound files in a folder.
+
+# It does not make a pair of two identical sounds.
+
+# The ISI duration can be specified in the input menu.
+
+# Useful for 2AFC listening experiments.
+
+
+
+form Files
+	comment Specify the directory
+	sentence InputDir ./
+	comment Specify the silence duration 
+	positive silenceDur 1.00
+endform
+
+createDirectory ("combined")
+
+Create Strings as file list... list 'inputDir$'*.wav
+numberOfFiles= Get number of strings
+
+for i to numberOfFiles
+
+	# opens the first file
+	select Strings list
+	fileName1$ = Get string... i
+	Read from file... 'inputDir$''fileName1$'
+	soundOne$=selected$("Sound")
+
+		# create silence
+		silence$ = Create Sound from formula... silence Mono 0 silenceDur 44100  0
+		silenceSound$=selected$("Sound")
+
+			# opens the second file		
+			for k to numberOfFiles
+			select Strings list
+			fileName2$ = Get string... k
+				if k <> i
+				Read from file... 'inputDir$''fileName2$'
+				soundTwo$=selected$("Sound")
+
+					# Now concatenate	
+					select Sound 'soundOne$'
+					plus Sound 'silenceSound$'
+					plus Sound 'soundTwo$'
+					Concatenate
+
+					name$ = fileName1$ - ".wav"
+					Write to WAV file... ./combined/'name$'_'fileName2$'
+				endif
+			endfor
+endfor
+
+
+select all
+Remove
